@@ -6,7 +6,6 @@ import io.hhplus.tdd.database.UserPointTable;
 import java.util.List;
 
 public class PointService {
-    private UserPoint userPoint;
 
     // 특정 유저의 포인트를 조회하는 기능
     public UserPoint getUserPoint(long id){
@@ -21,8 +20,9 @@ public class PointService {
 
     // 특정 유저의 포인트를 충전하는 기능
     public UserPoint setCharge(long id, long amount, TransactionType charge) {
+        UserPoint userPoint = new UserPointTable().insertOrUpdate(id, amount);
         new PointHistoryTable().insert(id, amount, charge, userPoint.updateMillis());
-        return new UserPointTable().insertOrUpdate(id, amount);
+        return userPoint;
     }
 
     // 특정 유저의 포인트를 사용
