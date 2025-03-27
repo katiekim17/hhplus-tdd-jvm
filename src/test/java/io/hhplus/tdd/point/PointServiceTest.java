@@ -2,14 +2,11 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -17,8 +14,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -133,6 +128,19 @@ class PointServiceTest {
         // then - 예외발생하는 지 확인
         assertThatThrownBy(()-> {
             pointService.setCharge(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
+    }
+
+    @Test
+    @DisplayName("충전시 음수 포인트를 넣었을 때 -> 예외 발생, 문구 출력")
+    void setUseFail() {
+        // given
+        long negativePoint = -300L;
+
+        // when - 충전 시도
+        // then - 예외발생하는 지 확인
+        assertThatThrownBy(()-> {
+            pointService.setUsePoint(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
     }
 
