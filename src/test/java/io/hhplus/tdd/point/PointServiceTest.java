@@ -180,4 +180,21 @@ class PointServiceTest {
             pointService.setUsePoint(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
     }
+
+    @Test
+    @DisplayName("사용할 포인트가 부족할 때 -> 예외 발생, 문구 출력")
+    void insufficientPointTest() {
+        // given
+        long initPoint = 300L; // 초기 포인트
+        long reqPoint = 500L; // 사용요청한 포인트
+
+        UserPoint fakeUserPoint = new UserPoint(ANY_USER_ID, initPoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
+        given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
+
+        // when - 사용 시도
+        // then - 예외발생하는 지 확인
+        assertThatThrownBy(()-> {
+            pointService.setUsePoint(ANY_USER_ID, reqPoint, TransactionType.USE);
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage("포인트가 부족합니다.");
+    }
 }

@@ -71,7 +71,7 @@ public class PointService {
         // 차감하기
         long newPoint = userPoint.point() - amount;
         if (newPoint < 0){
-            throw new IllegalArgumentException("포인트가 부족합니다");
+            throw new IllegalArgumentException("포인트가 부족합니다.");
         }
 
         // 포인트 히스토리테이블에 결과 값 저장
