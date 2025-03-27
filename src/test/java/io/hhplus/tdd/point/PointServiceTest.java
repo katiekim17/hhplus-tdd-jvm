@@ -138,6 +138,9 @@ class PointServiceTest {
         assertThatThrownBy(()-> {
             pointService.setCharge(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
+
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, negativePoint, TransactionType.CHARGE, ANY_UPDATE_MILLIS);
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, negativePoint, TransactionType.USE, ANY_UPDATE_MILLIS);
     }
 
     @Test
@@ -197,6 +200,9 @@ class PointServiceTest {
         assertThatThrownBy(()-> {
             pointService.setUsePoint(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
+
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, negativePoint, TransactionType.CHARGE, ANY_UPDATE_MILLIS);
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, negativePoint, TransactionType.USE, ANY_UPDATE_MILLIS);
     }
 
     @Test
@@ -214,5 +220,8 @@ class PointServiceTest {
         assertThatThrownBy(()-> {
             pointService.setUsePoint(ANY_USER_ID, reqPoint, TransactionType.USE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("포인트가 부족합니다.");
+
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, reqPoint, TransactionType.CHARGE, ANY_UPDATE_MILLIS);
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, reqPoint, TransactionType.USE, ANY_UPDATE_MILLIS);
     }
 }
