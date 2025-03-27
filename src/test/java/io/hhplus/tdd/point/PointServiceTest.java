@@ -14,7 +14,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PointServiceTest {
@@ -109,14 +111,13 @@ class PointServiceTest {
         given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
         given(userPointTable.insertOrUpdate(ANY_USER_ID, initPoint + chargePoint)).willReturn(fakeChargedUserPoint);
 
-        System.out.println("userPointTable.selectById(ANY_USER_ID)_TEST: " + userPointTable.selectById(ANY_USER_ID));
-
         // when - 충전 시도
         pointService.setCharge(ANY_USER_ID, chargePoint, TransactionType.CHARGE);
 
         // then - 400L이 되는지 확인
         assertThat(fakeChargedUserPoint.point()).isEqualTo(initPoint + chargePoint);
     }
+
 
     @Test
     @DisplayName("충전시 음수 포인트를 넣었을 때 -> 예외 발생, 문구 출력")
@@ -131,8 +132,37 @@ class PointServiceTest {
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
     }
 
+
     @Test
-    @DisplayName("충전시 음수 포인트를 넣었을 때 -> 예외 발생, 문구 출력")
+    @DisplayName("특정 유저의 포인트를 사용 - 성공케이스")
+    void setUsePoint() {
+        // 성공케이스 - 유저정보가 있는 상태에서, 기존포인트 500L - 사용할 포인트 300L = newPoint(200L) 값이 반환되고, 기록이 남아야함
+        // given
+        long initPoint = 500L; // 초기 포인트
+        long usePoint = 300L; // 사용할 포인트
+        long afterUsePoint = initPoint - usePoint; // 예상 포인트
+
+        UserPoint fakeUserPoint = new UserPoint(ANY_USER_ID, initPoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
+        UserPoint fakeAfterUseUserPoint = new UserPoint(ANY_USER_ID, afterUsePoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
+        given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
+        given(userPointTable.insertOrUpdate(ANY_USER_ID, afterUsePoint)).willReturn(fakeAfterUseUserPoint);
+
+        // when - 사용 시도
+        pointService.setUsePoint(ANY_USER_ID, usePoint, TransactionType.USE);
+
+        // then - 정상적으로 차감되어 200L이 되는지 확인, 포인트 히스토리테이블에 결과 값 저장되어 있는 지 확인
+        assertThat(fakeAfterUseUserPoint.point()).isEqualTo(afterUsePoint);
+        verify(pointHistoryTable).insert(
+                eq(ANY_USER_ID),
+                eq(afterUsePoint),
+                eq(TransactionType.USE),
+                eq(ANY_UPDATE_MILLIS)
+        );
+    }
+
+
+    @Test
+    @DisplayName("사용시 음수 포인트를 넣었을 때 -> 예외 발생, 문구 출력")
     void setUseFail() {
         // given
         long negativePoint = -300L;
@@ -142,9 +172,5 @@ class PointServiceTest {
         assertThatThrownBy(()-> {
             pointService.setUsePoint(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
-    }
-
-    @Test
-    void setUsePoint() {
     }
 }
