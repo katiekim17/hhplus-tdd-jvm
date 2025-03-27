@@ -106,16 +106,23 @@ class PointServiceTest {
         // given
         long initPoint = -100L;
         long chargePoint = 300L;
+        long expectedPoint = initPoint + chargePoint;
         UserPoint fakeUserPoint = new UserPoint(ANY_USER_ID, initPoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
-        UserPoint fakeChargedUserPoint = new UserPoint(ANY_USER_ID, initPoint + chargePoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
+        UserPoint fakeChargedUserPoint = new UserPoint(ANY_USER_ID, expectedPoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
         given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
-        given(userPointTable.insertOrUpdate(ANY_USER_ID, initPoint + chargePoint)).willReturn(fakeChargedUserPoint);
+        given(userPointTable.insertOrUpdate(ANY_USER_ID, expectedPoint)).willReturn(fakeChargedUserPoint);
 
         // when - 충전 시도
         pointService.setCharge(ANY_USER_ID, chargePoint, TransactionType.CHARGE);
 
-        // then - 400L이 되는지 확인
-        assertThat(fakeChargedUserPoint.point()).isEqualTo(initPoint + chargePoint);
+        // then - 400L이 되는지 확인, pointHistoryTable에 기록 들어가는지 확인
+        assertThat(fakeChargedUserPoint.point()).isEqualTo(expectedPoint);
+        verify(pointHistoryTable).insert(
+                eq(ANY_USER_ID),
+                eq(expectedPoint),
+                eq(TransactionType.CHARGE),
+                eq(ANY_UPDATE_MILLIS)
+        );
     }
 
 
