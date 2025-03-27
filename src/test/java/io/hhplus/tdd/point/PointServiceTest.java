@@ -14,9 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +32,7 @@ class PointServiceTest {
     static final long ANY_ID = 1L; // 아이디
     static final long ANY_USER_ID = 1L; // 아이디
 
-     // 테이블 가짜 객체가져오기
+    // 테이블 가짜 객체가져오기
     @Mock
     private UserPointTable userPointTable; //협력자
 
@@ -41,10 +43,10 @@ class PointServiceTest {
     private PointService pointService;
 
     // 초기화
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
+//    @BeforeEach
+//    void setUp(){
+//        MockitoAnnotations.openMocks(this);
+//    }
 
     /**
      * TODO - 기본과제
@@ -60,7 +62,7 @@ class PointServiceTest {
      */
 
     @Test
-    @DisplayName("특정 유저의 포인트를 조회하는 기능 테스트")
+    @DisplayName("특정 유저의 포인트를 조회하는 기능 테스트 - 성공케이스")
     void getUserPoint() {
         // 성공포인트 -> 데이터가 있을 떄, 해당 아이디를 입력하면 조회할 아이디의 포인트 정보를 얻을 수 있다
 
@@ -81,7 +83,7 @@ class PointServiceTest {
     }
 
     @Test
-    @DisplayName("특정 유저의 포인트 충전/이용 내역을 조회하는 기능")
+    @DisplayName("특정 유저의 포인트 충전/이용 내역을 조회하는 기능 - 성공케이스")
     void getPointHistory() {
         // 성공케이스 - id 주면 내가 미리 만들어 놓은 가짜 데이터와 동일한 데이터를 준다
         // given - 가짜 pointHitoryTable값 만들기
@@ -101,12 +103,12 @@ class PointServiceTest {
     }
 
     @Test
-    @DisplayName("특정 유저의 포인트를 충전하는 기능")
+    @DisplayName("특정 유저의 포인트를 충전하는 기능 - 성공케이스")
     void setCharge() {
         // 성공케이스 - 유저정보가 있는 상태에서, Charge 하면 기존 포인트 값(100L) + 입력한 포인트(200L) = newPoint(300L) 값이 반환됨
         // given
-        long  initPoint = 100L;
-        long  chargePoint = 300L;
+        long initPoint = -100L;
+        long chargePoint = 300L;
         UserPoint fakeUserPoint = new UserPoint(ANY_USER_ID, initPoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
         UserPoint fakeChargedUserPoint = new UserPoint(ANY_USER_ID, initPoint + chargePoint, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
         given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
@@ -118,7 +120,20 @@ class PointServiceTest {
         pointService.setCharge(ANY_USER_ID, chargePoint, TransactionType.CHARGE);
 
         // then - 400L이 되는지 확인
-        assertThat(fakeUserPoint.point()).isEqualTo(initPoint + chargePoint);
+        assertThat(fakeChargedUserPoint.point()).isEqualTo(initPoint + chargePoint);
+    }
+
+    @Test
+    @DisplayName("충전시 음수 포인트를 넣었을 때 -> 예외 발생, 문구 출력")
+    void setChargeFail() {
+        // given
+        long negativePoint = -300L;
+
+        // when - 충전 시도
+        // then - 예외발생하는 지 확인
+        assertThatThrownBy(()-> {
+            pointService.setCharge(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
     }
 
     @Test

@@ -41,13 +41,12 @@ public class PointService {
         // 컨트롤러를 통해 들어온 포인트의 유효성 검사를 한다
         UserPoint.pointValidation(amount);
         // 1. 컨트롤러에서 받은 유저 정보값을 이용하여 유저를 조회한다
-        UserPoint userPoint = this.getUserPoint(id);
+        UserPoint userPoint = userPointTable.selectById(id);
         // 2. 특정 유저의 포인트를 가져온다
         // 3. 특정 유저의 현재 포인트와 충전할 포인트를 계산한다
-        System.out.println("111userPointTable.selectById(ANY_USER_ID): " + userPoint.point());
         long newPoint = userPoint.point() + amount;
         // 4. UserPointTable에 유저와, 새로운 포인트값을 등록한다
-        userPoint = this.userPointTable.insertOrUpdate(id, newPoint);
+        userPoint = userPointTable.insertOrUpdate(id, newPoint);
         // 5. PointHistoryTable 아이디, 최종 포인트, 거래타입, 충전시간을 등록한다
         pointHistoryTable.insert(userPoint.id(), userPoint.point(), charge, userPoint.updateMillis());
         // 6. UserPoint 객체로 담아서 컨트롤러로 넘겨준다.

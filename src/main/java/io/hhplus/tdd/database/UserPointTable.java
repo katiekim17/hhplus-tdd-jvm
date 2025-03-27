@@ -1,6 +1,7 @@
 package io.hhplus.tdd.database;
 
 import io.hhplus.tdd.point.UserPoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
