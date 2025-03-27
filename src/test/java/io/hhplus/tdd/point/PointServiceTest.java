@@ -66,7 +66,7 @@ class PointServiceTest {
 
         //given 세팅영역, 데이터를 만듦, 데이터를 주면 getUserPoint를 통해 값을 준다고 설정
         UserPoint fakeUserPoint = new UserPoint(ANY_USER_ID, 100, ANY_UPDATE_MILLIS); // 가짜 데이터 만듦
-        given(pointService.getUserPoint(ANY_USER_ID)).willReturn(fakeUserPoint);
+        given(userPointTable.selectById(ANY_USER_ID)).willReturn(fakeUserPoint);
 
         //when 실행- 진짜 아이디를 주면  getUserPoint가 실행되는지 확인
         UserPoint result = pointService.getUserPoint(ANY_USER_ID);
@@ -90,8 +90,7 @@ class PointServiceTest {
         List<PointHistory> fakePointHistoryList = new ArrayList<>();
         fakePointHistoryList.add(fakePointUseHistory);
         fakePointHistoryList.add(fakePointChargeHistory);
-
-        given(pointService.getPointHistory(ANY_USER_ID)).willReturn(fakePointHistoryList);
+        given(pointHistoryTable.selectAllByUserId(ANY_USER_ID)).willReturn(fakePointHistoryList);
 
         // when 실행- 진짜 아이디를 주면  selectAllByUserId를 이용해서 리스트 가져오는 지 확인
         List<PointHistory> historyListResult = pointService.getPointHistory(ANY_USER_ID);
