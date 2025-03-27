@@ -16,7 +16,7 @@ public record UserPoint(
 
         // 정책이지만, 100 초과는 충전할 수 없다
         if (chargeAmount > MAX_POINT_LIMIT) {
-            throw new IllegalArgumentException("최대 충전값은 100입니다");
+            throw new IllegalArgumentException(String.format("최대 충전값은 %d입니다", MAX_POINT_LIMIT));
         }
     }
 

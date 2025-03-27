@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -137,6 +138,23 @@ class PointServiceTest {
         assertThatThrownBy(()-> {
             pointService.setCharge(ANY_USER_ID, negativePoint, TransactionType.CHARGE);
         }).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못된 충전 금액을 입력하셨습니다.");
+    }
+
+    @Test
+    @DisplayName("충전시 최대값 이상을 넣으면 -> 예외 발생, 한도 초과 문구 출력")
+    void checkMaxChargePoint() {
+        // given
+        long chargePoint = 10001L; // 충전하려는 금액
+        long MAX_POINT_LIMIT = 1000L; // 충전 최대 한도
+
+        // when - 충전 시도
+        // then - 한도 초과라는 예외발생하는 지 확인, pointHistoryTable에 기록이 '안' 들어가는지 확인
+        assertThatThrownBy(()-> {
+            pointService.setCharge(ANY_USER_ID, chargePoint, TransactionType.CHARGE);
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage(String.format("최대 충전값은 %d입니다", MAX_POINT_LIMIT));
+
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, chargePoint, TransactionType.CHARGE, ANY_UPDATE_MILLIS);
+        verify(pointHistoryTable, never()).insert(ANY_USER_ID, chargePoint, TransactionType.USE, ANY_UPDATE_MILLIS);
     }
 
 
