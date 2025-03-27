@@ -19,8 +19,17 @@ public class PointController {
         this.pointService = pointService;
     }
 
+
+    /**
+     * TODO - 기본과제
+     * TODO - 포인트 충전, 사용에 대한 정책 추가 (잔고 부족, 최대 잔고 등)
+     * TODO - 주어진 4가지 기능에 대한 단위 테스트 작성
+     */
+
+
     /**
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
+     * 실패: 유저가 없음 -> 새로만들어지고 -> 포인트가 0
      */
     @GetMapping("{id}")
     public UserPoint point(

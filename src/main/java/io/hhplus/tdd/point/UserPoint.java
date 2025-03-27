@@ -6,6 +6,7 @@ public record UserPoint(
         long updateMillis // 포인트 기록 업데이트 시간
 ) {
 
+    static final long MAX_POINT_LIMIT = 1000L;
 
     public static void pointValidation(long chargeAmount){
         // 들어온 포인트가 양수인지 확인, 음수이면 안됨
@@ -14,8 +15,8 @@ public record UserPoint(
         }
 
         // 정책이지만, 100 초과는 충전할 수 없다
-        if (chargeAmount > 100) {
-            throw  new IllegalArgumentException("최대 충전값은 100입니다");
+        if (chargeAmount > MAX_POINT_LIMIT) {
+            throw new IllegalArgumentException("최대 충전값은 100입니다");
         }
     }
 
