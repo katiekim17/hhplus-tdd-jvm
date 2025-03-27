@@ -11,12 +11,12 @@ public record UserPoint(
     public static void pointValidation(long chargeAmount){
         // 들어온 포인트가 양수인지 확인, 음수이면 안됨
         if (chargeAmount < 0) {
-            throw new IllegalArgumentException("잘못된 충전 금액을 입력하셨습니다");
+            throw new IllegalArgumentException("잘못된 충전 금액을 입력하셨습니다.");
         }
 
         // 정책이지만, 100 초과는 충전할 수 없다
         if (chargeAmount > MAX_POINT_LIMIT) {
-            throw new IllegalArgumentException("최대 충전값은 100입니다");
+            throw new IllegalArgumentException(String.format("최대 충전값은 %d입니다", MAX_POINT_LIMIT));
         }
     }
 
